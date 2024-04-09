@@ -1,48 +1,42 @@
 <?php
-
 namespace App\Http\Controllers;
+
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+
 class UserController extends Controller
 {
-    private $users;
-
-    public function __construct()
-    {
-        $this->users = new User();
-    }
     public function index()
     {
-        $userList = $this->users->getAllUser();
-        return $userList;
+        $users = User::all();
+        return response()->json($users);
     }
-
 
     public function store(Request $request)
     {
-        $data = $request->all();
-        $addUser = DB::table('users')->insert($data);
-        return $addUser;
+        $validatedData = $request->validate(User::$rules);
+        $user = User::create($validatedData);
+        return response()->json($user, 201);
     }
-
 
     public function show($id)
     {
-        $getUser = DB::table('users')->where('id', $id)->get();
-        return $getUser;
+        $user = User::findOrFail($id);
+        return response()->json($user);
     }
 
-    public function update($id, Request $request)
+    public function update(Request $request, $id)
     {
-        $data = $request->all();
-        $updateUser = DB::table('users')->where('id', $id)->update($data);
-        return $updateUser;
+        $user = User::findOrFail($id);
+        $validatedData = $request->validate(User::$rules);
+        $user->update($validatedData);
+        return response()->json($user);
     }
 
     public function destroy($id)
     {
-        $destroyUser = DB::table('users')->where('id', $id)->delete();
-        return $destroyUser;
+        $user = User::findOrFail($id);
+        $user->delete();
+        return response()->json(null, 204);
     }
 }
